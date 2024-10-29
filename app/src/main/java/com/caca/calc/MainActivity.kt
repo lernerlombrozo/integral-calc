@@ -9,15 +9,18 @@ import com.applovin.sdk.AppLovinSdk
 import com.applovin.sdk.AppLovinSdkInitializationConfiguration
 
 class MainActivity : ComponentActivity() {
-    private var applovinTag = "dl applovin"
+    private var tag = "dl mainActivity"
     private lateinit var applovinRewardedHandler: ApplovinRewardedHandler
-    private lateinit var webappListener: WebAppListener
+    private lateinit var applovinInterstitialHandler: ApplovinInterstitialHandler
+    private lateinit var rewardedAdListener: AdListener
+    private lateinit var interstitialAdListener: AdListener
     private lateinit var webView: WebView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initializeWebView()
         configureRewardedAd()
+        configureInterstitialAd()
         initializeApplovin()
     }
 
@@ -36,20 +39,33 @@ class MainActivity : ComponentActivity() {
             .setMediationProvider(AppLovinMediationProvider.MAX)
             .build()
         AppLovinSdk.getInstance(this).initialize(initConfig) { sdkConfig ->
-            Log.d(applovinTag, "sdk initialized")
+            Log.d(tag, "sdk initialized")
         }
     }
 
     private fun configureRewardedAd(){
         applovinRewardedHandler = ApplovinRewardedHandler()
-        webappListener = WebAppListener()
-        webappListener.setLoadAdListener {
+        rewardedAdListener = AdListener()
+        rewardedAdListener.setLoadAdListener {
             applovinRewardedHandler.loadRewardedAd(this)
         }
-        webappListener.setShowAdListener {
+        rewardedAdListener.setShowAdListener {
             applovinRewardedHandler.showRewardedAd(this)
         }
-        webView.addJavascriptInterface(webappListener, "Applovin")
-        Log.d("dl", "added applovin interface")
+        webView.addJavascriptInterface(rewardedAdListener, "ApplovinRewarded")
+        Log.d(tag, "added rewarded interface")
+    }
+
+    private fun configureInterstitialAd(){
+        applovinInterstitialHandler = ApplovinInterstitialHandler()
+        interstitialAdListener = AdListener()
+        interstitialAdListener.setLoadAdListener {
+            applovinInterstitialHandler.loadInterstitialAd(this)
+        }
+        interstitialAdListener.setShowAdListener {
+            applovinInterstitialHandler.showInterstitialAd(this)
+        }
+        webView.addJavascriptInterface(interstitialAdListener, "ApplovinInterstitial")
+        Log.d(tag, "added interstitial interface")
     }
 }

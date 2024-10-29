@@ -38,6 +38,8 @@ class ApplovinRewardedHandler : MaxRewardedAdListener {
 
     override fun onAdLoaded(var1: MaxAd){
         Log.d(applovinTag, "ad loaded")
+        retryAttempt = 0.0
+
     }
 
     override fun onAdDisplayed(var1: MaxAd){
@@ -58,16 +60,13 @@ class ApplovinRewardedHandler : MaxRewardedAdListener {
         Log.d(applovinTag, "ad load failed")
         // Rewarded ad failed to load
         // AppLovin recommends that you retry with exponentially higher delays up to a maximum delay (in this case 64 seconds)
-
         retryAttempt++
         val delayMillis = TimeUnit.SECONDS.toMillis( Math.pow( 2.0, Math.min( 6.0, retryAttempt ) ).toLong() )
-
         Handler(Looper.getMainLooper()).postDelayed( { rewardedAd.loadAd() }, delayMillis )
     }
 
     override fun onAdDisplayFailed(var1: MaxAd, var2: MaxError){
         Log.d(applovinTag, "ad display failed")
-
     }
 
     override fun onUserRewarded(maxAd: MaxAd, maxReward: MaxReward)

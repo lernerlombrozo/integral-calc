@@ -7,6 +7,7 @@
     <title>Calc</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js" integrity="sha512-UxA96DnrUS08g7OSNzn0pV+il4lrdvuTpiPjLrmL9mKP1U7FoUtqMvSTjGCMnCKXE1ss3IQ4GBor3gS1WteN+w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script type="text/javascript">
         google.charts.load('current', { 'packages': ['corechart'] });
 
@@ -138,8 +139,6 @@
                 <h1>dx</h1>
             </div>
             <div class="centered">
-                <small>Use javascript expressions</small>
-                <br/>
                 <button type="button" v-on:click="solveForX()">Solve for x</button>
             </div>
             <div class="integral">
@@ -153,20 +152,11 @@
         let counter = 0;
 
         const evaluateIntegral = (fx, from, to, n = 100) => {
-            counter++;
-            if (fx === "l" || counter === 1) {
-                loadAd();
-                return;
-            }
-            if (fx === "s" || counter === 4) {
-                showAd();
-                counter = 0;
-                return;
-            }
             const h = (to - from) / n;
             let sum = 0;
             let x = from;
-            let yPrev = eval(fx);
+            // let yPrev = eval(fx);
+            let yPrev = math.evaluate(fx, {x})
             let xPrev = x;
             const values = [
                 ['x', 'f(x)'],
@@ -174,7 +164,8 @@
             ]
             for (let i = 0; i < n; i++) {
                 x = xPrev + h;
-                const y = eval(fx);
+                // const y = eval(fx);
+                const y = math.evaluate(fx, {x})
                 sum += (y + yPrev) / 2 * h;
                 xPrev = x
                 yPrev = y;
@@ -182,6 +173,20 @@
             }
             drawChart(values)
             return sum.toFixed(2);
+        }
+
+        const handleAd = (fx) => {
+            counter++;
+            if (fx === "il" || counter === 1) {
+                loadAd();
+            } else if (fx === "is" || counter === 4) {
+                showAd();
+            } else if (fx === "rl" || counter === 5) {
+                loadAd();
+            } else if (fx === "rs" || counter === 8) {
+                showAd();
+                counter = 0;
+            }
         }
 
         const loadAd = () => {
@@ -209,6 +214,7 @@
                     this.from = Number(this.$refs.from.value);
                     this.to = Number(this.$refs.to.value);
                     this.ans = evaluateIntegral(this.fx, this.from, this.to);
+                    handleAd(this.fx);
                 }
             }
         })
