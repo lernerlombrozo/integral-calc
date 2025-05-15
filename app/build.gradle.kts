@@ -12,8 +12,8 @@ android {
         applicationId = "com.caca.calc"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "2"
+        versionCode = 5
+        versionName = "5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

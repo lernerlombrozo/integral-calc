@@ -142,7 +142,8 @@
                 <button type="button" v-on:click="solveForX()">Solve for x</button>
             </div>
             <div class="integral">
-                <p>{{ans}}</p>
+                <p v-if="!errorMessage">{{ans}}</p>
+                <small style="color: #ff0033;" v-if="errorMessage">{{errorMessage}}</small>
             </div>
         </div>
         <div id="chart_div" class="half-screen first"></div>
@@ -152,6 +153,7 @@
         let counter = 0;
 
         const evaluateIntegral = (fx, from, to, n = 100) => {
+            fx = fx.toLowerCase();
             const h = (to - from) / n;
             let sum = 0;
             let x = from;
@@ -160,8 +162,8 @@
             let xPrev = x;
             const values = [
                 ['x', 'f(x)'],
-                [xPrev, yPrev]
             ]
+            if((yPrev || yPrev === 0) && yPrev !== Infinity && yPrev !== -Infinity) values.push([xPrev, yPrev]);
             for (let i = 0; i < n; i++) {
                 x = xPrev + h;
                 // const y = eval(fx);
@@ -169,34 +171,45 @@
                 sum += (y + yPrev) / 2 * h;
                 xPrev = x
                 yPrev = y;
-                values.push([xPrev, yPrev])
+                if((yPrev || yPrev === 0) && yPrev !== Infinity && yPrev !== -Infinity) values.push([xPrev, yPrev]);
             }
             drawChart(values)
             return sum.toFixed(2);
         }
 
         const handleAd = (fx) => {
+            fx = fx.toLowerCase();
             counter++;
             if (fx === "il" || counter === 1) {
-                loadAd();
+                loadInterstitialAd();
             } else if (fx === "is" || counter === 4) {
-                showAd();
+                showInterstitialAd();
             } else if (fx === "rl" || counter === 5) {
-                loadAd();
+                loadRewardedAd();
             } else if (fx === "rs" || counter === 8) {
-                showAd();
+                showRewardedAd();
                 counter = 0;
             }
         }
 
-        const loadAd = () => {
-            console.log("load ad");
-            Applovin.loadAd();
+        const loadInterstitialAd = () => {
+            console.log("load interstitial ad");
+            ApplovinInterstitial.loadAd();
         }
 
-        const showAd = () => {
-            console.log("show ad");
-            Applovin.showAd();
+        const showInterstitialAd = () => {
+            console.log("show interstitial ad");
+            ApplovinInterstitial.showAd();
+        }
+
+        const loadRewardedAd = () => {
+            console.log("load rewarded ad");
+            ApplovinRewarded.loadAd();
+        }
+
+        const showRewardedAd = () => {
+            console.log("show rewarded ad");
+            ApplovinRewarded.showAd();
         }
 
         const app = createApp({
@@ -206,14 +219,20 @@
                     from: null,
                     to: 10,
                     ans: null,
+                    errorMessage:null
                 }
             },
             methods: {
                 solveForX() {
+                    this.errorMessage = null;
                     this.fx = this.$refs.fx.value;
                     this.from = Number(this.$refs.from.value);
                     this.to = Number(this.$refs.to.value);
-                    this.ans = evaluateIntegral(this.fx, this.from, this.to);
+                    try{
+                        this.ans = evaluateIntegral(this.fx, this.from, this.to);
+                    } catch (err){
+                        this.errorMessage = err; 
+                    }
                     handleAd(this.fx);
                 }
             }
